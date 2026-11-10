@@ -1,0 +1,147 @@
+[tools]
+python = "3.12.16"
+uv = "0.13.6"
+
+[tasks.setup]
+description = "Instala dependências e cria .env apenas se necessário"
+run = '''
+uv sync --locked
+if [ ! -e .env ]; then
+  cp -n .env.example .env
+  echo "Arquivo .env criado a partir de .env.example."
+fi
+'''
+
+[tasks.dev]
+description = "Inicia o ambiente de desenvolvimento pelo Docker Compose"
+depends = ["docker:check"]
+run = "docker compose up --build"
+
+[tasks.start]
+description = "Inicia os três serviços e o gateway local com recarregamento"
+run = "uv run --locked python scripts/dev_local.py"
+
+[tasks.test]
+description = "Executa os testes Pytest"
+run = "uv run --locked pytest"
+
+[tasks.lint]
+description = "Verifica o código com Ruff"
+run = "uv run --locked ruff check ."
+
+[tasks.format]
+description = "Formata o código com Ruff"
+run = "uv run --locked ruff format ."
+
+[tasks.check]
+description = "Executa Ruff, verifica a formatação e roda os testes"
+run = "uv run --locked ruff check . && uv run --locked ruff format --check . && uv run --locked pytest"
+
+[tasks."docker:check"]
+description = "Verifica se Docker Compose está disponível"
+hide = true
+run = '''
+if ! command -v docker >/dev/null 2>&1; then
+  echo "Docker não encontrado. Instale e inicie o Docker Desktop ou Docker Engine com Compose." >&2
+  exit 1
+fi
+if ! docker compose version >/dev/null 2>&1; then
+  echo "Docker Compose não disponível. Instale o plugin Compose." >&2
+  exit 1
+fi
+if ! docker info >/dev/null 2>&1; then
+  echo "Docker indisponível. Inicie o Docker Desktop ou o serviço Docker." >&2
+  exit 1
+fi
+'''
+
+[tasks."app:up"]
+hide = true
+description = "Constrói e inicia as três variantes com catálogo local"
+depends = ["docker:check"]
+run = "sh scripts/variants_up.sh"
+
+[tasks."app:down"]
+hide = true
+description = "Encerra as três variantes preservando os dados"
+depends = ["docker:check"]
+run = "for variant in complete cinehub matchhub; do docker compose -p reviewhub-$variant down; done"
+
+[tasks."app:complete"]
+description = "Constrói e inicia ReviewHub Complete com catálogo local"
+depends = ["docker:check"]
+run = "sh scripts/variants_up.sh complete"
+
+[tasks."app:complete:down"]
+description = "Encerra ReviewHub Complete sem apagar seus dados"
+depends = ["docker:check"]
+run = "docker compose -p reviewhub-complete down"
+
+[tasks."app:cinehub"]
+description = "Constrói e inicia CineHub com catálogo local"
+depends = ["docker:check"]
+run = "sh scripts/variants_up.sh cinehub"
+
+[tasks."app:cinehub:down"]
+description = "Encerra CineHub sem apagar seus dados"
+depends = ["docker:check"]
+run = "docker compose -p reviewhub-cinehub down"
+
+[tasks."app:matchhub"]
+description = "Constrói e inicia MatchHub com catálogo local"
+depends = ["docker:check"]
+run = "sh scripts/variants_up.sh matchhub"
+
+[tasks."app:matchhub:down"]
+description = "Encerra MatchHub sem apagar seus dados"
+depends = ["docker:check"]
+run = "docker compose -p reviewhub-matchhub down"
+
+[tasks."docker:up"]
+description = "Constrói e inicia os serviços em segundo plano"
+depends = ["docker:check"]
+run = "docker compose up --build -d"
+
+[tasks."docker:down"]
+description = "Encerra os serviços sem remover os volumes de dados"
+depends = ["docker:check"]
+run = "docker compose down"
+
+[tasks."docker:logs"]
+description = "Acompanha os logs dos serviços"
+depends = ["docker:check"]
+run = "docker compose logs -f"
+
+[tasks."db:migrate"]
+description = "Aplica as migrations nos três serviços do Compose em execução"
+depends = ["docker:check"]
+run = '''
+for service in identity catalog reviews; do
+  docker compose exec -T "$service" python -c "from services.$service.main import engine; from services.migrations import migrate; migrate('$service', engine)" || exit $?
+done
+'''
+
+[tasks."db:seed"]
+description = "Carrega o seed idempotente no catálogo em execução"
+depends = ["docker:check"]
+run = "docker compose exec -T catalog python -m services.catalog.seed"
+
+[tasks."lps:validate"]
+description = "Valida o arquivo de produto informado como argumento"
+run = "uv run --locked reviewhub validate"
+
+[tasks."lps:derive"]
+description = "Deriva o arquivo de produto informado como argumento"
+run = "uv run --locked reviewhub derive"
+
+[tasks."lps:cinehub"]
+description = "Deriva a configuração do CineHub"
+run = "uv run --locked reviewhub derive products/cinehub.yaml"
+
+[tasks."lps:matchhub"]
+description = "Deriva a configuração do MatchHub"
+run = "uv run --locked reviewhub derive products/matchhub.yaml"
+
+[tasks."lps:complete"]
+description = "Deriva a configuração do ReviewHub Complete"
+run = "uv run --locked reviewhub derive products/complete.yaml"

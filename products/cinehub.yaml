@@ -1,0 +1,4 @@
+name: CineHub
+color: '#a855f7'
+domains: [movies, series]
+features: [external_tmdb, identity, catalog, reviews, rating, custom_lists, comments, spoiler_control, episode_metadata]

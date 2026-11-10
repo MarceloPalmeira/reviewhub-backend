@@ -1,0 +1,7 @@
+# Catálogo local
+
+Os registros em `services/catalog/local_dataset.py` foram adaptados de uma seleção dos conjuntos [Vetustas Archiva](https://github.com/0xShady/vetustas-archiva/tree/main/datasets), de 0xShady e colaboradores, disponíveis sob [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Selecionamos e adaptamos campos dos arquivos `movies.csv`, `tv.csv`, `games.csv` e `music.csv`; dados acessados em 9 de novembro de 2026. O arquivo derivado `local_dataset.py` é disponibilizado sob a mesma licença. As partidas foram compiladas a partir dos resultados factuais publicados pela [FIFA](https://www.fifa.com/es/articles/que-seleccion-gano-la-ultima-copa-mundial-de-la-fifa-qatar-2022).
+
+São cinco registros por domínio, além dos exemplos fictícios já existentes. Os títulos e metadados são dados para avaliação; não incluem obras, faixas de áudio, pôsteres ou notas prontas. Plataformas e nomes das faixas não foram fornecidos pela seleção e não são inventados. O catálogo funciona sem rede para provedores. A licença dos dados não concede direitos sobre obras ou imagens.
+
+O seed adiciona identificadores estáveis apenas nos domínios habilitados e nunca altera registros já existentes. O modo `mise run app:up` executa o seed em cada variante automaticamente; em um ambiente Compose individual, use `mise run db:seed`. Dados novos eventualmente adicionados ao arquivo podem ser inseridos repetindo o comando.
