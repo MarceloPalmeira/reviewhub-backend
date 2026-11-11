@@ -1,4 +1,4 @@
 name: MatchHub
 color: '#16a34a'
 domains: [football_matches]
-features: [external_football, identity, catalog, reviews, rating, comments, football_scoreboard]
+features: [external_football, identity, catalog, reviews, rating, recommendations, comments, football_scoreboard]

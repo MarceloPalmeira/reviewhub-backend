@@ -1,6 +1,6 @@
 # ReviewHub Backend
 
-ReviewHub é uma família de aplicações de avaliações para Reuso de Software e Linha de Produto de Software (LPS). Identity, Catalog e Reviews são processos FastAPI separados, cada um dono de seu banco PostgreSQL e suas migrations Alembic. O núcleo `reviewhub_core` fornece contratos de domínio, políticas, descoberta de plugins e validação da configuração. [Arquitetura, modelo de features e evidências acadêmicas](docs/arquitetura.md).
+ReviewHub é uma família de aplicações de avaliações para Reuso de Software e Linha de Produto de Software (LPS). Identity, Catalog e Reviews são processos FastAPI separados, cada um dono de seu banco PostgreSQL e suas migrations Alembic; Recommendations é um quarto serviço, sem banco, que calcula sugestões a partir do histórico do usuário. O núcleo `reviewhub_core` fornece contratos de domínio, políticas, descoberta de plugins e validação da configuração. [Arquitetura, modelo de features e evidências acadêmicas](docs/arquitetura.md).
 
 ## Iniciar uma aplicação
 
@@ -38,7 +38,7 @@ mise run lps:cinehub      # escolha também lps:matchhub ou lps:complete
 mise run start            # serviços nativos; requer PostgreSQL local configurado
 ```
 
-Inicie o frontend em outro terminal com `mise run start` na pasta `reviewhub-frontend` e abra `http://localhost:5173`. O gateway atende em `http://localhost:8080`; Swagger: identidade `http://localhost:8001/docs`, catálogo `http://localhost:8002/docs`, reviews `http://localhost:8003/docs`. O Compose usa `../reviewhub-frontend`. O seed é idempotente e contém exemplos fictícios. O setup não exige Docker nem credenciais externas.
+Inicie o frontend em outro terminal com `mise run start` na pasta `reviewhub-frontend` e abra `http://localhost:5173`. O gateway atende em `http://localhost:8080`; Swagger: identidade `http://localhost:8001/docs`, catálogo `http://localhost:8002/docs`, reviews `http://localhost:8003/docs`, recomendações `http://localhost:8004/docs`. O Compose usa `../reviewhub-frontend`. O seed é idempotente e contém exemplos fictícios. O setup não exige Docker nem credenciais externas.
 
 ```sh
 mise run start            # serviços e gateway nativos, com recarregamento
@@ -54,7 +54,7 @@ mise run check            # lint, verificação de formato e testes
 mise tasks ls
 ```
 
-O modo nativo inicia Identity em `127.0.0.1:8001`, Catalog em `:8002`, Reviews em `:8003` e o gateway de desenvolvimento em `:8080`. Todos exibem logs no terminal e são encerrados com Ctrl+C. Os serviços aplicam migrations na inicialização; o comando não executa seed. O gateway reutiliza `scripts/e2e_gateway.py` e é destinado apenas ao desenvolvimento local.
+O modo nativo inicia Identity em `127.0.0.1:8001`, Catalog em `:8002`, Reviews em `:8003`, Recommendations em `:8004` e o gateway de desenvolvimento em `:8080`. Todos exibem logs no terminal e são encerrados com Ctrl+C. Os serviços aplicam migrations na inicialização; o comando não executa seed. O gateway reutiliza `scripts/e2e_gateway.py` e é destinado apenas ao desenvolvimento local.
 
 Antes de iniciar, disponibilize PostgreSQL local com três bancos e credenciais separadas. Os padrões são os mesmos de `infra/init.sql`, no host `127.0.0.1:5432`: bancos `identity`, `catalog` e `reviews`, com usuários `identity_service`, `catalog_service` e `reviews_service`. Para provisionar uma instância **nova** de desenvolvimento, um administrador pode executar `psql -U SEU_ADMIN -d postgres -v ON_ERROR_STOP=1 -f infra/init.sql`; o script cria roles e bancos e não é idempotente. Em uma instância existente, configure os bancos e permissões apropriados sem sobrescrever dados.
 
@@ -64,7 +64,7 @@ O modo Docker requer Docker com Compose: `mise run docker:up` inicia PostgreSQL,
 
 Os limites de memória dos containers somam 1.536 MiB: PostgreSQL 384 MiB, cada API 320 MiB, gateway 64 MiB e frontend 128 MiB. Cada API usa um worker; PostgreSQL usa `shared_buffers=64MB` e até 60 conexões. São limites iniciais, não uma medição nem garantia de execução em 2 GiB: Docker/VM, sistema operacional, cache, swap e o build têm consumo adicional. O build pode exigir mais memória que a execução. Monitore com `docker stats` durante a carga representativa, e confira falhas por falta de memória com `docker inspect` e os logs. Em Docker Desktop, confira também o consumo e limite da VM. Não use esses valores como configuração de produção sem testes.
 
-O `.env` fornece `JWT_SECRET`, `CORS_ORIGINS` e credenciais opcionais dos provedores; as URLs de banco e credenciais de desenvolvimento estão no Compose e em `infra/init.sql`. O volume `pgdata` preserva os dados entre reinícios e `docker:down` não o remove. Após derivar um produto, reinicie os serviços para carregar o manifesto. As portas 5173, 8080 e 8001–8003 devem estar disponíveis. Não exponha essa configuração de desenvolvimento à internet.
+O `.env` fornece `JWT_SECRET`, `CORS_ORIGINS` e credenciais opcionais dos provedores; as URLs de banco e credenciais de desenvolvimento estão no Compose e em `infra/init.sql`. O volume `pgdata` preserva os dados entre reinícios e `docker:down` não o remove. Após derivar um produto, reinicie os serviços para carregar o manifesto. As portas 5173, 8080 e 8001–8004 devem estar disponíveis. Não exponha essa configuração de desenvolvimento à internet.
 
 As tasks Docker e de banco requerem Docker e os serviços devidos disponíveis; `db:migrate` e `db:seed` operam nos containers já iniciados. As migrations também são aplicadas pelos serviços na inicialização. Não remova volumes para migrar. **Bancos criados pela versão anterior com `create_all` não possuem histórico Alembic:** faça backup e avalie cuidadosamente a equivalência do esquema antes de registrar uma linha de base. O script PostgreSQL do Compose provisiona bancos e usuários somente em volume novo.
 

@@ -75,6 +75,24 @@ services:
       db: {condition: service_healthy}
     healthcheck: *service_health
     ports: ["${REVIEWS_PORT:-8003}:8000"]
+  recommendations:
+    mem_limit: ${RECOMMENDATIONS_MEMORY_LIMIT:-${API_MEMORY_LIMIT:-192m}}
+    image: reviewhub-backend:local
+    build: .
+    command: uvicorn services.recommendations.main:app --host 0.0.0.0 --port 8000 --workers 1
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?Configure JWT_SECRET no arquivo .env}
+      PRODUCT_CONFIG: /config/product.json
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      CATALOG_URL: http://catalog:8000
+      REVIEWS_URL: http://reviews:8000
+    volumes:
+      - ${PRODUCT_DIR:-./generated}:/config:ro
+    depends_on:
+      catalog: {condition: service_healthy}
+      reviews: {condition: service_healthy}
+    healthcheck: *service_health
+    ports: ["${RECOMMENDATIONS_PORT:-8004}:8000"]
   gateway:
     image: nginx:alpine
     mem_limit: ${GATEWAY_MEMORY_LIMIT:-64m}
@@ -92,6 +110,7 @@ services:
       identity: {condition: service_healthy}
       catalog: {condition: service_healthy}
       reviews: {condition: service_healthy}
+      recommendations: {condition: service_healthy}
   frontend:
     image: reviewhub-frontend:local
     build: ../reviewhub-frontend

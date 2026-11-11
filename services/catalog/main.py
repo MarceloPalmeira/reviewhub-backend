@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from datetime import datetime
+from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field, ValidationError
@@ -7,7 +8,6 @@ from sqlalchemy import JSON, DateTime, ForeignKey, String, UniqueConstraint, sel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from reviewhub_core.plugins import FeatureRegistry
 from services.common import (
     configure_app,
     current_user,
@@ -17,6 +17,7 @@ from services.common import (
     new_id,
     now,
     product,
+    registry,
     secret,
 )
 from services.migrations import migrate
@@ -89,7 +90,7 @@ def render(item):
         "domain": item.domain,
         "title": item.title,
         "description": item.description,
-        "metadata": FeatureRegistry(product().domains)
+        "metadata": registry()
         .get(item.domain)
         .visible_metadata(item.metadata_json, product().features),
         "cover_url": item.cover_url,
@@ -130,18 +131,21 @@ def contents(
     domain: str | None = None,
     page: int = Query(1, ge=1),
     limit: int = Query(12, ge=1, le=100),
+    content_id: Annotated[list[str] | None, Query(max_length=100)] = None,
 ):
+    """Lista paginada; `content_id` repetido busca vários conteúdos em lote."""
     available = product().domains
     if domain and domain not in available:
         raise HTTPException(404, "Domínio indisponível")
     with Session() as db:
+        stmt = select(Content).where(
+            Content.domain.in_([domain] if domain else available),
+            Content.title.ilike(f"%{q}%"),
+        )
+        if content_id:
+            stmt = stmt.where(Content.id.in_(content_id))
         stmt = (
-            select(Content)
-            .where(
-                Content.domain.in_([domain] if domain else available),
-                Content.title.ilike(f"%{q}%"),
-            )
-            .order_by(Content.created_at.desc())
+            stmt.order_by(Content.created_at.desc())
             .offset((page - 1) * limit)
             .limit(limit)
         )
@@ -161,7 +165,7 @@ def get_content(content_id: str):
 def create_content(data: ContentCreate, user_id: str = Depends(current_user)):
     try:
         metadata = (
-            FeatureRegistry(product().domains)
+            registry()
             .get(data.domain)
             .validate_metadata(data.metadata, product().features)
         )

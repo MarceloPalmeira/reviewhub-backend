@@ -754,3 +754,41 @@ def test_seed_music_tolerates_concurrent_insert(clients, monkeypatch):
             )
 
     assert seed_music.main(Racing(), [mbid], wait=0) == 0
+
+
+def test_catalog_batch_lookup_by_ids(clients):
+    users, catalog, _ = clients
+    users.post(
+        "/api/v1/auth/register",
+        json={
+            "username": "lote",
+            "display_name": "Lote",
+            "email": "lote@example.org",
+            "password": "password123",
+        },
+    )
+    token = users.post(
+        "/api/v1/auth/login", json={"username": "lote", "password": "password123"}
+    ).json()["access_token"]
+    ids = []
+    for n in range(3):
+        ids.append(
+            catalog.post(
+                "/api/v1/contents",
+                headers={"Authorization": f"Bearer {token}"},
+                json={
+                    "domain": "movies",
+                    "title": f"Filme {n}",
+                    "description": "",
+                    "metadata": {
+                        "director": "Ana",
+                        "duration_minutes": 90,
+                        "year": 2020,
+                    },
+                },
+            ).json()["id"]
+        )
+    found = catalog.get(
+        "/api/v1/contents", params=[("content_id", ids[0]), ("content_id", ids[2])]
+    ).json()
+    assert sorted(item["id"] for item in found) == sorted([ids[0], ids[2]])

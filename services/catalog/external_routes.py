@@ -3,10 +3,9 @@ from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from reviewhub_core.plugins import FeatureRegistry
 from services.catalog.providers.base import ProviderError
 from services.catalog.providers.registry import configured_provider, provider_name
-from services.common import current_user, product
+from services.common import current_user, product, registry
 
 
 class ImportInput(BaseModel):
@@ -80,7 +79,7 @@ def routes(Session, Content, render):
                     or external.external_id != data.external_id
                 ):
                     raise ProviderError("Resposta externa incompatível", 502)
-                plugin = FeatureRegistry(product().domains).get(data.domain)
+                plugin = registry().get(data.domain)
                 metadata = plugin.visible_metadata(
                     external.metadata, product().features
                 )

@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import UTC, datetime, timedelta
+from functools import lru_cache
 from pathlib import Path
 from typing import Annotated
 from uuid import uuid4
@@ -15,11 +16,29 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 from reviewhub_core.features import Product
+from reviewhub_core.plugins import FeatureRegistry
 
 
 def product():
     path = Path(os.getenv("PRODUCT_CONFIG", "generated/product.json"))
-    return Product.model_validate(json.loads(path.read_text(encoding="utf-8")))
+    return _parse_product(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=8)
+def _parse_product(text: str) -> Product:
+    # Validar o manifesto carrega plugins; o cache por conteúdo evita repetir
+    # isso a cada item e ainda reflete a troca de produto sem reiniciar.
+    return Product.model_validate(json.loads(text))
+
+
+@lru_cache(maxsize=8)
+def _registry(domains: tuple[str, ...]) -> FeatureRegistry:
+    return FeatureRegistry(list(domains))
+
+
+def registry() -> FeatureRegistry:
+    """Plugins dos domínios do produto atual (em cache)."""
+    return _registry(tuple(product().domains))
 
 
 def enabled(feature: str):

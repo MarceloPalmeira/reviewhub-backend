@@ -28,6 +28,7 @@ class FeatureValidator:
         "imdb_ratings",
         "comments",
         "custom_lists",
+        "recommendations",
         "review_likes",
         "user_follows",
         "social_feed",
@@ -41,6 +42,7 @@ class FeatureValidator:
     dependencies: ClassVar[dict[str, str]] = {
         "social_feed": "user_follows",
         "comments": "reviews",
+        "recommendations": "reviews",
         "custom_lists": "catalog",
         "review_likes": "reviews",
         "episode_metadata": "series",

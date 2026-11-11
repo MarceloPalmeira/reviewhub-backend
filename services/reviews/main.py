@@ -10,7 +10,6 @@ from sqlalchemy import Boolean, DateTime, Float, String, UniqueConstraint, func,
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from reviewhub_core.plugins import FeatureRegistry
 from services.common import (
     configure_app,
     current_user,
@@ -20,6 +19,7 @@ from services.common import (
     new_id,
     now,
     product,
+    registry,
     secret,
 )
 from services.migrations import migrate
@@ -105,7 +105,7 @@ def render(row):
 
 def validate(domain, data):
     try:
-        FeatureRegistry(product().domains).get(domain).review_policy(
+        registry().get(domain).review_policy(
             "domain_specific_rating" in product().features
         ).validate(data.rating, data.text)
     except ValueError as exc:

@@ -41,6 +41,7 @@ def environment():
     env.setdefault("IDENTITY_URL", "http://127.0.0.1:8001")
     env.setdefault("CATALOG_URL", "http://127.0.0.1:8002")
     env.setdefault("REVIEWS_URL", "http://127.0.0.1:8003")
+    env.setdefault("RECOMMENDATIONS_URL", "http://127.0.0.1:8004")
     return env
 
 
@@ -84,6 +85,7 @@ def main():
         ("identity", "services.identity.main:app", "8001"),
         ("catalog", "services.catalog.main:app", "8002"),
         ("reviews", "services.reviews.main:app", "8003"),
+        ("recommendations", "services.recommendations.main:app", "8004"),
         ("gateway", "scripts.e2e_gateway:app", "8080"),
     ]
     processes = []
