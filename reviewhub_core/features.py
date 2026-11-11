@@ -25,6 +25,7 @@ class FeatureValidator:
         "external_igdb",
         "external_musicbrainz",
         "external_football",
+        "imdb_ratings",
         "comments",
         "custom_lists",
         "review_likes",
@@ -73,6 +74,7 @@ class FeatureValidator:
             "external_igdb": {"video_games"},
             "external_musicbrainz": {"music_albums"},
             "external_football": {"football_matches"},
+            "imdb_ratings": {"movies", "series"},
         }
         for feature, compatible in provider_domains.items():
             if feature in enabled and not domain_set.intersection(compatible):

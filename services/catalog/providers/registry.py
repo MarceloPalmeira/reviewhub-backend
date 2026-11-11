@@ -6,6 +6,7 @@ from services.catalog.providers.base import ProviderError
 from services.catalog.providers.football import FootballProvider
 from services.catalog.providers.igdb import IGDBProvider
 from services.catalog.providers.musicbrainz import MusicBrainzProvider
+from services.catalog.providers.omdb import OMDbProvider
 from services.catalog.providers.tmdb import TMDBProvider
 
 
@@ -27,6 +28,8 @@ def configured_provider(name):
             return MusicBrainzProvider(agent)
     if name == "football" and os.getenv("FOOTBALL_DATA_API_TOKEN"):
         return FootballProvider(os.environ["FOOTBALL_DATA_API_TOKEN"])
+    if name == "omdb" and os.getenv("OMDB_API_KEY"):
+        return OMDbProvider(os.environ["OMDB_API_KEY"])
     return None
 
 

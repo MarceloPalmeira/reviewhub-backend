@@ -16,7 +16,7 @@ uv run --locked python scripts/products_local.py
 # Limites por variante; não incluem VM nem build.
 export DB_MEMORY_LIMIT=160m IDENTITY_MEMORY_LIMIT=256m API_MEMORY_LIMIT=128m GATEWAY_MEMORY_LIMIT=32m FRONTEND_MEMORY_LIMIT=32m
 # Não utilizar credenciais de APIs externas neste modo.
-export TMDB_API_TOKEN= IGDB_CLIENT_ID= IGDB_CLIENT_SECRET= FOOTBALL_DATA_API_TOKEN= MUSICBRAINZ_USER_AGENT=
+export TMDB_API_TOKEN= IGDB_CLIENT_ID= IGDB_CLIENT_SECRET= FOOTBALL_DATA_API_TOKEN= MUSICBRAINZ_USER_AGENT= OMDB_API_KEY=
 
 for variant in $variants; do
   case "$variant" in

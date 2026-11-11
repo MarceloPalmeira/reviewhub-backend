@@ -46,6 +46,15 @@ def test_invalid_feature_dependency():
         Product.model_validate(data)
 
 
+def test_imdb_ratings_requires_movies_or_series():
+    data = yaml.safe_load(Path("products/matchhub.yaml").read_text())
+    data["features"].append("imdb_ratings")
+    with pytest.raises(ValidationError, match="imdb_ratings exige um domínio"):
+        Product.model_validate(data)
+    cinehub = yaml.safe_load(Path("products/cinehub.yaml").read_text())
+    assert "imdb_ratings" in Product.model_validate(cinehub).features
+
+
 def test_derivation_is_deterministic_and_distinct(tmp_path):
     outputs = []
     for product in ("cinehub", "matchhub"):

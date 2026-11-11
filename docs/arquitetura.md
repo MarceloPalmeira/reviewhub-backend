@@ -84,6 +84,7 @@ flowchart TD
  O --> R[DomainSpecificRating exige plugin compatível]
  O --> C[Comments e ReviewLikes exigem Reviews]
  O --> L[CustomLists exige Catalog]
+ O --> M[ImdbRatings exige Movies ou Series]
 ```
 
 | Feature/domínio | CineHub | MatchHub | Complete |
@@ -93,6 +94,7 @@ flowchart TD
 | FootballMatches | não | sim | sim |
 | VideoGames, MusicAlbums | não | não | sim |
 | Comments | sim | sim | sim |
+| ImdbRatings (OMDb) | sim | não | sim |
 | CustomLists | sim | não | sim |
 | SpoilerControl | sim | não | sim |
 | ReviewLikes, UserFollows, SocialFeed | não | não | sim |

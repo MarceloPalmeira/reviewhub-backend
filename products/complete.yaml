@@ -1,4 +1,4 @@
 name: ReviewHub Complete
 color: '#2563eb'
 domains: [movies, series, video_games, football_matches, music_albums]
-features: [external_tmdb, external_igdb, external_musicbrainz, external_football, identity, catalog, reviews, rating, custom_lists, comments, review_likes, user_follows, social_feed, spoiler_control, episode_metadata, track_listing, football_scoreboard, game_platforms]
+features: [external_tmdb, imdb_ratings, external_igdb, external_musicbrainz, external_football, identity, catalog, reviews, rating, custom_lists, comments, review_likes, user_follows, social_feed, spoiler_control, episode_metadata, track_listing, football_scoreboard, game_platforms]

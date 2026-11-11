@@ -87,6 +87,11 @@ mise run docker:up
 mise run db:seed
 ```
 
+Com `OMDB_API_KEY` no `.env`, `mise run db:seed:omdb` adiciona cerca de 100 filmes reais com pôster e sinopse ao CineHub ou ao Complete. Veja [provedores](docs/provedores.md#catálogo-de-filmes-via-omdb).
+Com `FOOTBALL_DATA_API_TOKEN`, `mise run db:seed:football` adiciona as partidas reais da Copa do Mundo 2026 e do Brasileirão ao MatchHub ou ao Complete. Veja [provedores](docs/provedores.md#partidas-via-football-dataorg).
+Com `MUSICBRAINZ_USER_AGENT`, `mise run db:seed:music` adiciona cerca de 100 álbuns reais com capa e faixas ao Complete. Veja [provedores](docs/provedores.md#álbuns-via-musicbrainz).
+Com `IGDB_CLIENT_ID` e `IGDB_CLIENT_SECRET`, `mise run db:seed:games` adiciona cerca de 100 games reais com capa ao Complete. Veja [provedores](docs/provedores.md#games-via-igdb).
+
 O arquivo `generated/product.json` é determinístico. Os serviços o leem e o gateway o entrega à interface; ao trocar o produto, reinicie a aplicação e recarregue a página. A troca não remove dados. Uma configuração inválida é rejeitada pelo configurador e na inicialização dos serviços. Filmes não aparecem em MatchHub; o backend bloqueia operações para domínios e features desabilitados. O frontend só apresenta controles de features ativas.
 
 ## Testes e qualidade

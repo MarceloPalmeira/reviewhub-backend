@@ -301,5 +301,7 @@ def remove_list_item(
 
 
 from services.catalog.external_routes import routes as external_routes
+from services.catalog.imdb_routes import routes as imdb_routes
 
 app.include_router(external_routes(Session, Content, render))
+app.include_router(imdb_routes(Session, Content))

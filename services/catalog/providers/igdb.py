@@ -91,6 +91,22 @@ class IGDBProvider(ExternalCatalogProvider):
             raise ProviderError("Conteúdo externo não encontrado", 404)
         return self.normalize_content(data[0], domain)
 
+    def get_many(self, external_ids, domain):
+        """Detalhes de até 500 jogos em uma única requisição."""
+        if domain != "video_games":
+            raise ProviderError("Domínio incompatível", 404)
+        ids = [str(i) for i in external_ids]
+        if not ids or len(ids) > 500 or not all(i.isdecimal() for i in ids):
+            raise ProviderError("Identificadores externos inválidos", 422)
+        data = self._games(
+            f"fields {FIELDS}; where id = ({','.join(ids)}); limit {len(ids)};"
+        )
+        return [
+            self.normalize_content(x, domain)
+            for x in data
+            if x.get("id") and x.get("name")
+        ]
+
     def normalize_content(self, data, domain):
         release = None
         try:

@@ -126,6 +126,42 @@ description = "Carrega o seed idempotente no catálogo em execução"
 depends = ["docker:check"]
 run = "docker compose exec -T catalog python -m services.catalog.seed"
 
+[tasks."db:seed:omdb"]
+description = "Adiciona ~100 filmes reais via OMDb ao catálogo em execução (requer OMDB_API_KEY)"
+depends = ["docker:check"]
+run = "docker compose exec -T catalog python -m services.catalog.seed_omdb"
+
+[tasks."db:seed:omdb:local"]
+description = "Adiciona os filmes OMDb ao catálogo configurado no ambiente local"
+run = "uv run --locked --env-file .env python -m services.catalog.seed_omdb"
+
+[tasks."db:seed:football"]
+description = "Adiciona partidas reais (Copa 2026 e Brasileirão) ao catálogo em execução"
+depends = ["docker:check"]
+run = "docker compose exec -T catalog python -m services.catalog.seed_football"
+
+[tasks."db:seed:football:local"]
+description = "Adiciona as partidas reais ao catálogo configurado no ambiente local"
+run = "uv run --locked --env-file .env python -m services.catalog.seed_football"
+
+[tasks."db:seed:music"]
+description = "Adiciona ~100 álbuns reais via MusicBrainz ao catálogo em execução"
+depends = ["docker:check"]
+run = "docker compose exec -T catalog python -m services.catalog.seed_music"
+
+[tasks."db:seed:music:local"]
+description = "Adiciona os álbuns MusicBrainz ao catálogo configurado no ambiente local"
+run = "uv run --locked --env-file .env python -m services.catalog.seed_music"
+
+[tasks."db:seed:games"]
+description = "Adiciona ~100 games reais via IGDB ao catálogo em execução"
+depends = ["docker:check"]
+run = "docker compose exec -T catalog python -m services.catalog.seed_games"
+
+[tasks."db:seed:games:local"]
+description = "Adiciona os games IGDB ao catálogo configurado no ambiente local"
+run = "uv run --locked --env-file .env python -m services.catalog.seed_games"
+
 [tasks."lps:validate"]
 description = "Valida o arquivo de produto informado como argumento"
 run = "uv run --locked reviewhub validate"

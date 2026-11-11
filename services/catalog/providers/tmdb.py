@@ -54,6 +54,17 @@ class TMDBProvider(ExternalCatalogProvider):
         )
         return self.normalize_content(data, domain)
 
+    def imdb_id(self, external_id, domain):
+        if not external_id.isdecimal():
+            raise ProviderError("Identificador externo inválido", 422)
+        kind = self._kind(domain)
+        data = self.cache.get_or_load(
+            ("external_ids", domain, external_id),
+            lambda: self._get(f"{kind}/{external_id}/external_ids"),
+        )
+        value = data.get("imdb_id")
+        return value if isinstance(value, str) and value.startswith("tt") else None
+
     @staticmethod
     def _kind(domain):
         if domain not in ("movies", "series"):
